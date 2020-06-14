@@ -3,121 +3,16 @@
 {% block content %}
 <div class="modal-content">
   <div class="row">
-    <label for="validtill" class="labelcenter" id="lblTime"><b>Time Remaining: {{endingon}}</b></label>
-  </div>
-  <div class="row">
     <div class="qpapercolumn" style="background-color:#aaa;">
-      {% for qpage in qpaper %}
-        <p><img src="{{ item[0] }}" style="width: 100%;"></p>
-      {% endfor %}
+      <p><img src="../static/image/class12-csc-mt3.pdf_dir/0_class12-csc-mt3.pdf.jpg" style="width: 100%;"></p>
+      <p><img src="../static/image/class12-csc-mt3.pdf_dir/1_class12-csc-mt3.pdf.jpg" style="width: 100%;"></p>
+      <p><img src="../static/image/class12-csc-mt3.pdf_dir/2_class12-csc-mt3.pdf.jpg" style="width: 100%;"></p>
+      <p><img src="../static/image/class12-csc-mt3.pdf_dir/3_class12-csc-mt3.pdf.jpg" style="width: 100%;"></p>
     </div>
     <div class="qpapercolumn" style="background-color:#bbb;">
-      <h4>Anwers</h4>
-      {% for item in dbqna %}
-        <p>
-          <label class="labelcenternocolor">Points: {{ item[9] }}</label>
-          <p style="border-style:ridge;">
-            Question {{ item[2] }}.
-            {% set choice = "choice" ~ loop.index %}
-            {% if item[3] == "single" %}
-              <input type="radio" name="{{ choice }}" value="{{ item[4] }}">
-            {% elif item[3] == "multiple" %}
-              <input type="checkbox" name="{{ choice }}" value="{{ item[4] }}">
-            {% elif item[3] == "text" %}
-              <input type="text" name="{{ choice }}" value="">
-            {% endif %}
-            <label for="{{ choice }}">{{ item[2] }}</label><br>
-
-            {% if item[3] == "single" %}
-              <input type="radio" name="{{ choice }}" value="{{ item[5] }}">
-            {% elif item[3] == "multiple" %}
-              <input type="checkbox" name="{{ choice }}" value="{{ item[5] }}">
-            {% endif %}
-            <label for="{{ choice }}">{{ item[3] }}</label><br>
-
-            {% if item[3] == "single" %}
-              <input type="radio" name="{{ choice }}" value="{{ item[6] }}">
-            {% elif item[3] == "multiple" %}
-              <input type="checkbox" name="{{ choice }}" value="{{ item[6] }}">
-            {% endif %}
-            <label for="{{ choice }}">{{ item[3] }}</label><br>
-
-            {% if item[3] == "single" %}
-              <input type="radio" name="{{ choice }}" value="{{ item[7] }}">
-            {% elif item[3] == "multiple" %}
-              <input type="checkbox" name="{{ choice }}" value="{{ item[7] }}">
-            {% endif %}
-            <label for="{{ choice }}">{{ item[3] }}</label><br>
-
-            {% if item[3] == "single" %}
-              <input type="radio" name="{{ choice }}" value="{{ item[8] }}">
-            {% elif item[3] == "multiple" %}
-              <input type="checkbox" name="{{ choice }}" value="{{ item[8] }}">
-            {% endif %}
-            <label for="{{ choice }}">{{ item[3] }}</label><br>
-          </p>
-        </p>
-      {% endfor %}
+      <h2>Column 2</h2>
       <p>Some text..</p>
     </div>
   </div>
 </div>
-<script>
-  var dt = new Date();
-  document.getElementById("spndatetime").innerHTML = dt.toLocaleDateString();
-</script>
-<script>
-  //x = document.getElementById("lblTime");
-
-  // Set the date we're counting down to
-  var countDownDate = new Date("{{ endingon }}");
-  
-  // Update the count down every 1 second
-  var x = setInterval(function() {
-  
-    // Get today's date and time
-    var now = new Date().getTime();
-      
-    // Find the distance between now and the count down date
-    var distance = countDownDate - now;
-      
-    // Time calculations for days, hours, minutes and seconds
-    var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-      
-    // Output the result in an element with id="demo"
-    document.getElementById("lblTime").innerHTML = "<b>Time Remaining: " + days + "d " + hours + "h "
-    + minutes + "m " + seconds + "s </b>";
-      
-    // If the count down is over, write some text 
-    if (distance < 0) {
-      document.getElementById("btnSubmit").disabled = true;
-      clearInterval(x);
-      document.getElementById("lblTime").innerHTML = "EXPIRED";
-      document.getElementById("lblTime").className = "labelcenterblink";
-    }
-  }, 1000);
-</script>
-
-<script>
-function submitForm(id) {
-var ctrl = document.getElementById(id);
-
-switch (id) {
-  case "btnSubmit":
-    var r = confirm("Do you want submit all responses. You cannot change responses after Submit!");
-    if (r == true) {
-      document.getElementById("frmQuestion").action = "";
-      document.getElementById("frmQuestion").submit();
-    }
-    break;
-  default:
-    document.getElementById("frmQuestion").action = "";
-    document.getElementById("frmQuestion").submit();
-    break;
-}
-}
-</script>
 {% endblock %}

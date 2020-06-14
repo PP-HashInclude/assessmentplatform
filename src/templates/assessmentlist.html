@@ -1,0 +1,21 @@
+{% extends "basestudent.html" %}
+
+{% block content %}
+    <h3>
+        Open Assessments
+    </h3>
+
+    <table>
+        <tr>
+        <th>Assessment</th>
+        <th>Ending On</th>
+        </tr>
+        {% for item in dbrows|sort(attribute='EndingOn') %}
+            <tr>
+                <td><a href="{{ url_for('question') }}?asmt={{ item[0] }}">{{ item[0] }}</a></td>
+                <td>{{ item[2] }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}

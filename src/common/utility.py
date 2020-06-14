@@ -1,103 +1,141 @@
-import os
-import tempfile
-from pdf2image import convert_from_path
-from PIL import Image
-
+import requests
+from common import config
+import math, random
+import smtplib
+import enum
+from flask import session, json
+from repositories import db
+import datetime
 from pdf2jpg import pdf2jpg
+import os
+import base64
 
 
-def getQPaperData(qPaperFile):
-    filecontent = ""
+class Authorization(enum.Enum):
+    TEACHER = 0
+    STUDENT = 1
 
-    with open(qPaperFile, "r") as qfile:
-        filecontent = qfile.readlines()
+def getDictionaryLength(myobj):
+    keyLen, valLen = 0, 0
+    k_lst = list(myobj.keys())
+    v_lst = list(myobj.values())
+
+    for i in range(len(k_lst)):
+        keyLen += len(k_lst[i].encode('utf-8'))
+        valLen += len(v_lst[i].encode('utf-8'))
     
-    return filecontent
+    final = keyLen + valLen
 
-def convert_pdf(file_path, output_path):
-    # save temp image files in temp dir, delete them after we are finished
-    with tempfile.TemporaryDirectory() as temp_dir:
-        # convert pdf to multiple image
-        images = convert_from_path(file_path, output_folder=temp_dir, poppler_path='C:\\data\\Programs\\poppler-0.68.0\\bin')
-        # save images to temporary directory
-        temp_images = []
-        for i in range(len(images)):
-            image_path = f'{temp_dir}/{i}.jpg'
-            images[i].save(image_path, 'JPEG')
-            temp_images.append(image_path)
-            images[i].close()
+    return final
 
-        # read images into pillow.Image
-        imgs = list(map(Image.open, temp_images))
+def sendOTP(mobilenumber, otpMessage):
+    isSent = False
 
-        # find minimum width of images
-        min_img_width = min(i.width for i in imgs)
-        # find total height of all images
-        total_height = 0
-        for i, img in enumerate(imgs):
-            total_height += imgs[i].height
-        # create new image object with width and total height
-        merged_image = Image.new(imgs[0].mode, (min_img_width, total_height))
-        # paste images together one by one
-        y = 0
-        for img in imgs:
-            merged_image.paste(img, (0, y))
-            y += img.height
-        # save merged image
-        #merged_image.save(output_path)
-        base_filename = os.path.splitext(os.path.basename(file_path))[0] + '.jpg'
-        print (base_filename)
-        merged_image.save(output_path + "\\" + base_filename)
-        return output_path + "\\" + base_filename
+    try:
+        # print("INSIDE TRY")    
+        url = config.getSMSURL()
+        # print("STRING URL: ",str(url))
+        usr = config.get("BULKSMS_URL", "user")
+        # print("USER AND URL: ","BULKSMS_URL", usr)
+        pwd = config.get("BULKSMS_URL", "password")
+        sdr = config.get("BULKSMS_URL", "sender")
+        typ = config.get("BULKSMS_URL", "type")
+        
+        # print ("ALL VARIABLES", url, usr, pwd, sdr, typ)
+        
+        myobj = {'user': str(usr),
+            'password': str(pwd),
+            'sender': str(sdr),
+            'mobile': str(mobilenumber),
+            'type': str(typ),
+            'message': str(otpMessage)}
+        
+        conlength = getDictionaryLength(myobj)
 
-def convert_pdf2(filename, output_path):
-    with tempfile.TemporaryDirectory() as path:
-        images_from_path = convert_from_path(filename, output_folder=path, poppler_path='C:\\data\\Programs\\poppler-0.68.0\\bin')
+        resp = requests.post(url, data = myobj, headers={'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': str(conlength)})
+
+        # print(resp.text)
+        isSent = True
+    except Exception as ex:
+        print ("sendOTP:", ex)
+
+    return isSent
     
-    base_filename = os.path.splitext(os.path.basename(filename))[0] + '.jpg'
+def generateOTP():
+	digits_in_otp = "0123456789"
+	OTP = ""
 
-    for page in images_from_path:
-        page.save(os.path.join(output_path, base_filename), 'JPEG')
+# for a 4 digit OTP we are using 4 in range
+	for i in range(4):
+		OTP += digits_in_otp[math.floor(random.random() * 10)]
 
-def convert_pdf3(filename, output_path):
-    inputpath = filename
-    outputpath = output_path
-    # To convert single page
-    #result = pdf2jpg.convert_pdf2jpg(inputpath, outputpath, pages="1")
-    #print(result)
+	return OTP
 
-    # To convert multiple pages
-    #result = pdf2jpg.convert_pdf2jpg(inputpath, outputpath, pages="1,0,3")
-    #print(result)
+def allowed_file(filename):
+    extension = config.get("DB_IMPORT", "ALLOWED_EXTENSIONS")
+    allowed_extensions = {extension}
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
-    # to convert all pages
-    result = pdf2jpg.convert_pdf2jpg(inputpath, outputpath, pages="ALL")
-    #print(result)
-    imageslist = result[0]["output_jpgfiles"]
+def allowed_qpaperfile_extensions(filename):
+    extension = config.get("QPAPER", "QPAPER_ALLOWED_EXTENSIONS")
+    allowed_extensions = {extension}
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
-    images = [Image.open(x) for x in imageslist]
-    widths, heights = zip(*(i.size for i in images))
+
+def allowed_answerkeyfile_extensions(filename):
+    extension = config.get("QPAPER", "ANSWERKEY_ALLOWED_EXTENSIONS")
+    allowed_extensions = {extension}
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in allowed_extensions
+
+
+def sendEmail(email_to, email_data):
+   # creates SMTP session
+    s = smtplib.SMTP(config.get("EMAIL_SETTINGS", "SERVER"), config.get("EMAIL_SETTINGS", "PORT"))
     
-    min_img_width = min(i.width for i in images)
-
-    total_height = 0
-    for i, img in enumerate(images):
-            total_height += images[i].height
-
-    total_width = sum(widths)
-    max_height = max(heights)
-
-    new_im = Image.new('RGB', (total_width, max_height))
-    new_imy = Image.new('RGB', (min_img_width, total_height))
-
-    x_offset = 0
-    y_offset = 0
-    for im in images:
-        new_im.paste(im, (x_offset,0))
-        x_offset += im.size[0]
-
-        new_imy.paste(im, (0, y_offset))
-        y_offset += im.height
+    # start TLS for security 
+    s.starttls()
     
-    new_im.save('test.jpg')
-    new_imy.save('testy.jpg')
+    # Authentication
+    senderemail = config.get("EMAIL_SETTINGS", "SENDER_EMAIL_ID")
+    senderpwd = config.get("EMAIL_SETTINGS", "SENDER_EMAIL_PWD")
+    s.login(senderemail, senderpwd)
+    
+    # sending the mail 
+    s.sendmail(config.get("EMAIL_SETTINGS", "SENDER_EMAIL_ID"), email_to, email_data)
+    
+    # terminating the session 
+    s.quit()
+
+    return True
+
+
+def convert_qpaper(inputfolder, inputfilename, outputfolder, qpaperfoldername=""):
+    inputpathfile = os.path.join(inputfolder, inputfilename)
+    
+    result = pdf2jpg.convert_pdf2jpg(inputpathfile, outputfolder, dpi=300, pages="ALL")
+    print(result)
+    
+    #Remove filepaths and return only filenames as list
+    if len(qpaperfoldername) > 0:
+        qpaperfoldername = qpaperfoldername + "/" 
+
+    jpgoutputfolder = qpaperfoldername + os.path.basename(result[0]['output_pdfpath'])
+    jpgfilepaths = result[0]['output_jpgfiles']
+    jpgfiles = []
+    for jpgfile in jpgfilepaths:
+        jpgfiles.append((inputfilename, jpgoutputfolder + "/" + os.path.basename(jpgfile)))
+
+    return jpgfiles
+
+def degenerateb64String(data):
+    b64_one_bytes = base64.urlsafe_b64decode(data)
+
+    b64_one_str = str(b64_one_bytes, "utf-8")
+    b64_one_str = json.loads(b64_one_str)
+
+    #return json.dumps(b64_one_str, indent=4)
+
+    return b64_one_str

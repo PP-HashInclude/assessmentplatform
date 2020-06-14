@@ -1,0 +1,76 @@
+{% extends "baseteacher.html" %}
+{% block content %}
+<form class="modal-content" action="{{ url_for('studentassessmentdet') }}" method="POST">
+    <label class="labelcenternocolor"><strong>Student Assessment Detail</strong></label>
+    <div class="row">
+        <div class="block">
+            <label for="classid"><b>Select Class</b></label>
+        </div>
+        <div class="block">
+            <select name="classid" id="selClass">
+                {% for item in dbclassrows %}
+                    {% if classselected == item[0] %}
+                        <option value="{{ item[0] }}" selected="selected">{{item[0]}}</option>
+                    {% else %}
+                        <option value="{{ item[0] }}">{{item[0]}}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="block">
+            <label for="studentid"><b>Select Student</b></label>
+        </div>
+        <div class="block">
+            <select name="studentid" id="selStudent">
+                <option value=""></option>
+                {% for item in dbstudentrows %}
+                    {% if studentselected|int() == item[0]|int() %}
+                        <option value="{{ item[0] }}" selected="selected">{{item[1]}}</option>
+                    {% else %}
+                        <option value="{{ item[0] }}">{{item[1]}}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="block">
+            <label for="assessmentid"><b>Select Assessment</b></label>
+        </div>
+        <div class="block">
+            <select name="assessmentid" id="selAssessment">
+                <option value=""></option>
+                {% for item in dbassessmentrows %}
+                    {% if assessmentselected == item[1] %}
+                        <option value="{{ item[1] }}" selected="selected">{{item[1]}}</option>
+                    {% else %}
+                        <option value="{{ item[1] }}">{{item[1]}}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+      </div>
+      <br>
+    <button type="submit" id="btnGo">Go</button>
+    <table>
+        <tr>
+        <th>Q. No.</th>
+        <th>Question</th>
+        <th>Answer</th>
+        <th>Response</th>
+        <th>Score</th>
+        </tr>
+        {% for item in dbassessmentresponserows %}
+            <tr>
+                <td>{{ item[0] }}</td>
+                <td>{{ item[1] }}</td>
+                <td>{{ item[2] }}</td>
+                <td>{{ item[3] }}</td>
+                <td>{{ item[4] }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</form>
+{% endblock %}

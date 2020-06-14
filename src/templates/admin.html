@@ -1,0 +1,67 @@
+{% extends "baseteacher.html" %}
+
+{% block content %}
+  <form class="modal-content" action="{{ url_for('importdata') }}" method="post" enctype=multipart/form-data id="frmAdmin">
+    <div class="column80">
+      <label for="table"><b>Select Table:</b></label>
+      <select name="tablename" id="selTable">               
+          <option value="Competition" selected="selected">Assessment</option>
+          <option value="QuestionBank">Question Bank</option>
+          <option value="Admissions">Admissions</option>
+      </select>
+      <br>
+      <br>
+      <label for="file"><b>Select CSV data file</b></label>
+      <input type=file name=file>
+      <br>
+      <br>
+      <input type="checkbox" checked name="chkHeader" value="header">
+      <label for="chkHeader"><b>Header Record</b></label>
+      
+      <button type="button" id="btnImport" onclick="submitForm('btnImport');">Import</button>
+      <hr>
+      <strong>Remove Assessment</strong>
+      <label for="assessment"><b>Select Assessment to remove</b></label>
+      <select name="assessment" id="selAssessment">        
+          {% for item in dbrows %}
+                <option value="{{ item[0] }}">{{item[0]}}</option>
+          {% endfor %}
+      </select>
+      <button type="button" id="btnRemove" onclick="submitForm('btnRemove');">Remove Assessement</button>
+    </div>
+    <div class="column20">
+      <label for="templates"><b>CSV Data Templates</b></label>
+      <br>
+      <a href="{{ url_for('static', filename='template/Assessment_12.csv') }}">Assessment-Class 12</a>
+      <br>
+      <a href="{{ url_for('static', filename='template/QuestionBank_12.csv') }}">Question Bank-Class 12</a>
+      <br>
+      <a href="{{ url_for('static', filename='template/Admissions.csv') }}">Admissions</a>
+    </div>
+  </form>
+  <script>
+    function submitForm(id) {
+      var ctrl = document.getElementById(id);
+
+      switch (id) {
+        case "btnImport":
+          document.getElementById("frmAdmin").action = "{{ url_for('importdata') }}";
+          document.getElementById("frmAdmin").enctype = "multipart/form-data";
+          document.getElementById("frmAdmin").submit();
+          break;
+        case "btnRemove":
+          var e = document.getElementById("selAssessment");
+          var assmt = e.options[e.selectedIndex].value;
+          var r = confirm("This will remove Assessment: " + assmt + " Are you sure?");
+          if (r == true) {
+            document.getElementById("frmAdmin").action = "{{ url_for('removeassessment') }}";
+            document.getElementById("frmAdmin").enctype = "application/x-www-form-urlencoded";
+            document.getElementById("frmAdmin").submit();
+          }
+          break;
+        default:
+          break;
+      }
+    }
+    </script>
+  {% endblock %}

@@ -1,0 +1,278 @@
+{% extends "basestudent.html" %}
+
+{% block content %}
+  <form class="modal-content" action="{{ url_for('submit') }}" method="POST" id="frmQuestion">
+    <div class="imgcontainer">
+      <!--<img src="{{ url_for('static', filename='image/img_avatar2.png') }}" alt="Avatar" class="avatar">-->
+      {% for item in dbqna %}
+        {% if loop.first %}
+          <div class="row" style="margin: auto; text-align: center;">
+              <video id="video" style="margin: 0 auto; text-align: center; width: 60%; height: 60%;">Video stream not available.</video>
+              <div id="divSnap" style="display: none;">
+                <canvas id="canvas">
+                <img id="photo" alt="The screen capture will appear in this box.">
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+      <div class="row">
+        <h4>Student: {{ dbstudent[0][1] }}</h4>
+        <h4>Admission Number: {{ dbstudent[0][0] }}</h4>
+      </div>
+      <div class="row">
+        <strong>Assessment: {{ dbassessment.competitionname }}</strong>
+        <input type="hidden" name="assessment" value="{{ dbassessment.competitionname }}">
+        <input type="hidden" name="classid" value="{{ dbassessment.classid }}">
+      </div>
+      <div class="row">
+        <label for="validtill" class="labelcenter" id="lblTime"><b>Time Remaining: {{dbassessment.endingon}}</b></label>
+      </div>
+      <div class="row">
+        <div class="column70">
+          {% for item in dbqna %}
+            {% if loop.first %}
+              <div class="row" style="margin: auto; text-align: center; height: 70%; overflow: auto;">
+                {% for qitem in dbqpaperimages %}
+                  <img src="{{ url_for('static', filename=qitem[1]) }}" style="width:100%">
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div class="column30" id="divAnswersheet">
+          {% for item in dbqna %}
+            {% set qid = "qid" ~ loop.index %}
+            {% set qdesc = "qdesc" ~ loop.index %}
+            {% set points = "points" ~ loop.index %}
+            {% set negativepoints = "negativepoints" ~ loop.index %}
+            <input type="hidden" name="{{qid}}" value="{{ item[0] }}">
+            <input type="hidden" name="{{points}}" value="{{ item[6] }}">
+            <input type="hidden" name="{{negativepoints}}" value="{{ item[7] }}">
+            
+            <div class="row">
+              <div class="column">
+                <label><strong>Q: {{ item[0] }}</strong></label><br>
+              </div>
+              <div class="column">
+                <label class="labelcenternocolor">Points: {{ item[6] }}</label>
+              </div>
+            </div>
+            {% set choice = "choice" ~ loop.index %}
+            <input type="radio" name="{{ choice }}" value="{{ item[2] }}">
+            <label for="{{ choice }}">{{ item[2] }}</label><br>
+
+            <input type="radio" name="{{ choice }}" value="{{ item[3] }}">
+            <label for="{{ choice }}">{{ item[3] }}</label><br>
+
+            <input type="radio" name="{{ choice }}" value="{{ item[4] }}">
+            <label for="{{ choice }}">{{ item[4] }}</label><br>
+
+            <input type="radio" name="{{ choice }}" value="{{ item[5] }}">
+            <label for="{{ choice }}">{{ item[5] }}</label><br>
+            {% if loop.last %}
+              &nbsp;
+            {% else %}
+              <hr>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      {% for item in dbqna %}
+        {% if loop.first %}
+          <input type="hidden" name="qCount" value="{{ loop.length }}">
+          <div class="row">
+              <button type="button" id="btnSubmit" onclick="submitForm('btnSubmit');">Submit All</button>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </form>
+  {% for item in dbqna %}
+    {% if loop.first %}
+    <script>
+      // The width and height of the captured photo. We will set the
+      // width to the value defined here, but the height will be
+      // calculated based on the aspect ratio of the input stream.
+    
+      var width = 320;    // We will scale the photo width to this
+      var height = 0;     // This will be computed based on the input stream
+    
+      // |streaming| indicates whether or not we're currently streaming
+      // video from the camera. Obviously, we start at false.
+    
+      var streaming = false;
+    
+      // The various HTML elements we need to configure or control. These
+      // will be set by the startup() function.
+    
+      var video = null;
+      var canvas = null;
+      var photo = null;
+
+      // Fill the photo with an indication that none has been
+      // captured.
+      function clearphoto() {
+        var context = canvas.getContext('2d');
+        context.fillStyle = "#AAA";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+    
+        var data = canvas.toDataURL('image/png');
+        photo.setAttribute('src', data);
+      }
+
+      function startup() {
+          video = document.getElementById('video');
+          canvas = document.getElementById('canvas');
+          photo = document.getElementById('photo');
+      
+          navigator.mediaDevices.getUserMedia({video: true, audio: false})
+          .then(function(stream) {
+            video.srcObject = stream;
+            video.play();
+          })
+          .catch(function(err) {
+            //console.log("An error occurred: " + err);
+          });
+      
+          video.addEventListener('canplay', function(ev){
+            if (!streaming) {
+              height = video.videoHeight / (video.videoWidth/width);
+            
+              // Firefox currently has a bug where the height can't be read from
+              // the video, so we will make assumptions if this happens.
+            
+              if (isNaN(height)) {
+                height = width / (4/3);
+              }
+            
+              video.setAttribute('width', width);
+              video.setAttribute('height', height);
+              canvas.setAttribute('width', width);
+              canvas.setAttribute('height', height);
+              streaming = true;
+            }
+          }, false);
+      
+          clearphoto();
+        }
+
+      // Set up our event listener to run the startup process
+      // once loading is complete.
+      window.addEventListener('load', startup, false);
+
+      // Capture a photo by fetching the current contents of the video
+      // and drawing it into a canvas, then converting that to a PNG
+      // format data URL. By drawing it on an offscreen canvas and then
+      // drawing that to the screen, we can change its size and/or apply
+      // other changes before drawing it.
+      function takepicture() {
+        var context = canvas.getContext('2d');
+        if (width && height) {
+          canvas.width = width;
+          canvas.height = height;
+          context.drawImage(video, 0, 0, width, height);
+        
+          var data = canvas.toDataURL('image/png');
+          photo.setAttribute('src', data);
+        } else {
+          clearphoto();
+        }
+      }    
+      
+      function upload() {
+        //console.log("Uploading...")
+        var image = document.getElementById('photo').src;
+        var form = document.getElementById('frmQuestion');
+        var formData = new FormData(form);
+        formData.append("snapimgdata", image);
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("POST", "{{ url_for('savesnap') }}");
+    
+        // check when state changes, 
+        xmlhttp.onreadystatechange = function() {
+    
+        if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            //console.log("data successfully saved..");
+            }
+        }
+        xmlhttp.send(formData);
+        /*
+        console.log(formData.get('snapimgdata'));
+        console.log(formData.get('assessment'));
+        console.log(formData.get('classid'));
+        console.log("{{ dbstudent[0][0] }}");
+        console.log("{{ dbstudent[0][1] }}");
+        */
+      }
+      //x = document.getElementById("lblTime");
+
+      // Set the date we're counting down to
+      var countDownDate = new Date("{{ dbassessment.endingon }}");
+      var startsnap = setInterval(takepicture, 60000);
+      var startupload = setInterval(upload, 61000);
+      
+      // Update the count down every 1 second
+      var x = setInterval(function() {
+      
+      // Get today's date and time
+      var now = new Date().getTime();
+        
+      // Find the distance between now and the count down date
+      var distance = countDownDate - now;
+        
+      // Time calculations for days, hours, minutes and seconds
+      var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
+      // Output the result in an element with id="demo"
+      document.getElementById("lblTime").innerHTML = "<b>Time Remaining: " + days + "d " + hours + "h "
+      + minutes + "m " + seconds + "s </b>";
+      
+      // If the count down is over, write some text 
+      if (distance < 0) {
+        clearInterval(x);
+        clearInterval(startsnap);
+        clearInterval(startupload);
+        document.getElementById("btnSubmit").disabled = true;
+        document.getElementById("btnSubmit").style = "display: none;";
+        document.getElementById("divAnswersheet").style = "display: none;";
+        document.getElementById("lblTime").innerHTML = "EXPIRED";
+        document.getElementById("lblTime").className = "labelcenterblink";
+      }
+    }, 1000);
+  </script>
+    {% endif %}
+  {% endfor %}
+    <script>
+        function submitForm(id) {
+          var ctrl = document.getElementById(id);
+
+          switch (id) {
+            case "btnSubmit":
+              var r = confirm("Do you want submit all responses. You cannot change responses after Submit!");
+              if (r == true) {
+                document.getElementById("frmQuestion").action = "{{ url_for('submit') }}";
+                document.getElementById("frmQuestion").submit();
+              }
+              break;
+            default:
+              document.getElementById("frmQuestion").action = "{{ url_for('submit') }}";
+              document.getElementById("frmQuestion").submit();
+              break;
+          }
+        }
+    </script>
+    <script type="text/javascript">
+      //document.onmousedown = disableRightclick;
+      
+      var message = "Right click not allowed !!";
+      function disableRightclick(evt){
+          if(evt.button == 2){
+              alert(message);
+              return false;    
+          }
+      }
+      </script>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form class="modal-content" action="{{ url_for('ranks') }}" method="POST">
+    <label for="competition"><b>Select Assessment</b></label>
+    <select name="selCompetition" id="selCompetition">
+        <option value=""></option>
+        {% for item in dbassessmentrows %}
+            {% if competitionselected == item[0] %}
+                <option value="{{ item[0] }}" selected="selected">{{item[0]}}</option>
+            {% else %}
+                <option value="{{ item[0] }}">{{item[0]}}</option>
+            {% endif %}
+        {% endfor %}
+    </select>
+    <button type="submit" id="btnGo">Go</button>
+    <table>
+        <tr>
+        <th>Name</th>
+        <th>Subject</th>
+        <th>Score</th>
+        <th>Rank</th>
+        <th>SubmittedOn</th>
+        </tr>
+        {% for item in dbrows %}
+            <tr>
+                <td>{{ item[0] }}</td>
+                <td>{{ item[1] }}</td>
+                <td>{{ item[2] }}</td>
+                <td>{{ item[3] }}</td>
+                <td>{{ item[4] }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</form>
+{% endblock %}

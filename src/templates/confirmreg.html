@@ -1,0 +1,36 @@
+{% extends "baseteacher.html" %}
+
+{% block content %}
+<form class="modal-content" action="{{ url_for('confirmregistration') }}" method="post">
+    <input type="hidden" readonly name="rowcount" value="{{ rowcount }}">
+    <table>
+        <tr>
+        <th>Admission No.</th>
+        <th>Name</th>
+        <th>EMail</th>
+        <th>Mobile</th>
+        <th>Class</th>
+        <th>RegisteredOn</th>
+        </tr>
+        {% for item in dbrows %}
+            <tr>
+                {% set admno = "admno_" ~ loop.index %}
+                {% set confrm = "confrm_" ~ loop.index %}
+                <td>
+                    {{ item[0] }}
+                    <input type="hidden" name="{{ admno }}" value="{{ item[0] }}">
+                </td>
+                <td>{{ item[1] }}</td>
+                <td>{{ item[2] }}</td>
+                <td>{{ item[3] }}</td>
+                <td>{{ item[4] }}</td>
+                <td>{{ item[5] }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br>
+    {% if rowcount|int > 0 %}
+        <button type="submit">Confirm</button>
+    {% endif %}
+</form>
+{% endblock %}

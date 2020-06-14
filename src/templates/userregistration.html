@@ -1,0 +1,19 @@
+{% extends "basehome.html" %}
+
+{% block content %}
+    <div class="container">
+        {% if signupotpok %}
+            Login here: <a href="{{ url_for('login') }}">Login</a>
+        {% else %}
+            <form class="modal-content" action="{{ url_for('validateregistration') }}" method="post">
+                <label for="admno"><b>Admission/Joining Number</b></label>
+                <input type="text" placeholder="Enter 4 digit adminission number" name="admno" id="admno" required maxlength="4" pattern="\d{4}">
+
+                <label for="otp"><b>OTP</b></label>
+                <input type="password" placeholder="Enter OTP" name="otp" required maxlength="4" pattern="\d{4}"  >
+
+                <button type="submit">Submit</button>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}

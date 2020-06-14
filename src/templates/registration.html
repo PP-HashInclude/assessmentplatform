@@ -1,0 +1,60 @@
+{% extends "basehome.html" %}
+
+{% block content %}
+  <h2 align="center">#Ed Quiz-Signup</h2>
+  <div class="imgcontainer">
+    <img src="{{ url_for('static', filename='image/img_avatar2.png') }}" alt="Avatar" class="avatar">
+  </div>
+  <form class="modal-content" action="{{ url_for('register') }}" method="post" onSubmit = "return checkPassword(this)">
+    <br>
+    <br>
+    <label for="uname"><b>Name</b></label>
+    <input type="text" placeholder="Enter your name" name="uname" required maxlength="20">
+
+    <label for="email"><b>E-Mail</b></label>
+    <input type="email" placeholder="Enter your email" name="email" required>
+    
+    <label for="mobno"><b>Mobile Number</b></label>
+    <input type="text" placeholder="Enter 10 digit mobile number" name="mobno" id="mobno" required maxlength="10" pattern="\d{10}">
+    
+    <label for="admno"><b>Admission/Joining Number</b></label>
+    <input type="text" placeholder="Enter 4 digit adminission number" name="admno" id="admno" required maxlength="4" pattern="\d{4}">
+
+    <label for="psw1"><b>Password</b></label>
+    <input type="password" placeholder="Enter Password" name="psw1" id="psw1" required maxlength="20">
+    
+    <label for="psw2"><b>Confirm Password</b></label>
+    <input type="password" placeholder="Enter Password" name="psw2" id="psw2" required maxlength="20">
+
+    <button type="submit">Register</button>
+    <br>
+    <label style="color: red;">
+        {{ registrationmessage }}
+    </label>
+    <br>
+    <p>
+      <hr>
+      <label style="color: gray; font-size: 10px;">
+        PRIVACY NOTE: The system is not responsible for the authenticity of the data provided by user of the system. The system also cannot guarantee security of the browser and system used by user to access the system.
+      </label>
+    </p>
+  </form>
+  <script> 
+    // Function to check Whether both passwords 
+    // is same or not. 
+    function checkPassword(form)
+    {
+        // If Not same return False.     
+        if (form.psw1.value != form.psw2.value)
+        { 
+            alert ("\nPassword did not match: Please try again...") 
+            return false; 
+        } 
+        // If same return True. 
+        else
+        { 
+            return true; 
+        } 
+    }
+  </script> 
+{% endblock %}

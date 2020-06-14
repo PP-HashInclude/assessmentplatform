@@ -1,0 +1,167 @@
+{% extends "baseteacher.html" %}
+
+{% block content %}
+<form class="modal-content" action="{{ url_for('uploadassessment') }}" method="POST" enctype=multipart/form-data id="frmAssessment">
+    <label class="labelcenternocolor"><strong>Upload Assessement</strong></label>
+    <br>
+    <div class="row">
+        <div class="block">
+            <label for="classid"><b>Select Class</b></label>
+        </div>
+        <div class="block">
+            <select name="classid" id="classid">
+                {% for item in dbclassrows %}
+                    {% if classselected == item[0] %}
+                        <option value="{{ item[0] }}" selected="selected">{{item[0]}}</option>
+                    {% else %}
+                        <option value="{{ item[0] }}">{{item[0]}}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="block">
+            <label for="assessmentname"><b>Enter Assessment Name</b></label>
+        </div>
+        <div class="block">
+            <input type="text" maxlength="50" name="assessmentname" id="assessmentname" required title="Please enter assessment name">
+        </div>
+    </div>
+    <div class="row">
+        <div class="block">
+            <label for="description"><b>Assessment Description</b></label>
+        </div>
+        <div class="block">
+            <input type="text" maxlength="100" name="description" id="description">
+        </div>
+    </div>
+    <div class="row">
+        <div class="block">
+            <label for="startson"><b>Starts on Date/Time [DD-MM-YYYY HH:MM:SS] (24 hour format)</b></label>
+        </div>
+        <div class="block">
+            <input type="text" maxlength="19" name="startson" id="startson" required>
+        </div>
+    </div>
+    <div class="row">
+        <div class="block">
+            <label for="endson"><b>Ends on Date/Time [DD-MM-YYYY HH:MM:SS] (24 hour format)</b></label>
+        </div>
+        <div class="block">
+            <input type="text" maxlength="19" name="endson" id="endson" required>
+        </div>
+    </div>
+    <div class="row">
+        <div class="block">
+            <label for="note"><b>Note</b></label>
+        </div>
+        <div class="block">
+            <input type="text" maxlength="100" name="note" id="note">
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="block">
+            <label for="file"><b>Select PDF Question Paper file</b></label>
+        </div>
+        <div class="block">
+            <input type=file name=qpfile required>
+        </div>
+    </div>    
+    <div class="row">
+        <div class="block">
+            <label for="file"><b>Select Answer-Key CSV file</b></label>
+        </div>
+        <div class="block">
+            <input type=file name=akfile required>
+        </div>
+        <button type="button" id="btnUpload" onclick="submitForm('btnUpload');">Upload Assessment</button>
+    </div>
+    <br>
+    <hr>
+    <div class="row">
+        <label class="labelcenternocolor"><strong>Remove Assessement</strong></label>
+        <label for="assessment"><b>Select Assessment to remove</b></label>
+        <select name="assessment" id="selAssessment">        
+            {% for item in dbassessmentrows %}
+                  <option value="{{ item[0] }}">{{item[0]}}</option>
+            {% endfor %}
+        </select>
+        <button type="button" id="btnRemove" onclick="submitForm('btnRemove');">Remove Assessement</button>  
+    </div>
+    <br>
+    <hr>
+    <div class="row">
+        <label class="labelcenternocolor"><strong>Assessement Open Time</strong></label>
+        <label for="assessment"><b>Select Assessment</b></label>
+        <select name="assessmentchangedate" id="selAssessmentChangeDate">        
+            {% for item in dbassessmentrowschangedate %}
+                  <option value="{{ item[0] }}">{{item[0]}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="row">
+        <div class="block">
+            <label for="endsonremove"><b>Ends on Date/Time [DD-MM-YYYY HH:MM:SS] (24 hour format)</b></label>
+        </div>
+        <div class="block">
+            <input type="text" maxlength="19" name="endsonremove" id="endsonremove" pattern="\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}">
+        </div>
+    </div>
+    <button type="button" id="btnEndson" onclick="submitForm('btnEndson');">Update Assessement</button>  
+    </div>
+</form>
+<script>
+    function submitForm(id) {      
+        var ctrl = document.getElementById(id);
+
+        switch (id) {
+            case "btnUpload":
+            if (! document.getElementById("frmAssessment").checkValidity())
+            {
+                document.getElementById("frmAssessment").reportValidity();
+                return false;
+            }
+
+            document.getElementById("frmAssessment").action = "{{ url_for('uploadassessment', isloggedin=True) }}";
+            document.getElementById("frmAssessment").enctype = "multipart/form-data";
+            document.getElementById("frmAssessment").submit();
+            break;
+            case "btnRemove":
+            var e = document.getElementById("selAssessment");
+            if (e.selectedIndex > -1)
+            {
+                    var assmt = e.options[e.selectedIndex].value;
+                    var r = confirm("This will remove Assessment: " + assmt + " Are you sure?");
+                    if (r == true)
+                    {
+                        document.getElementById("frmAssessment").action = "{{ url_for('removeassessment', isloggedin=True) }}";
+                        document.getElementById("frmAssessment").enctype = "multipart/form-data";
+                        document.getElementById("frmAssessment").submit();
+                    }
+            }
+            break;
+            case "btnEndson":
+            var e = document.getElementById("selAssessmentChangeDate");
+            if (e.selectedIndex > -1)
+            {
+                var assmt = e.options[e.selectedIndex].value;
+                var edate = document.getElementById("endsonremove");
+                if ((edate.value.length != 19) || (! edate.checkValidity()))
+                {
+                    edate.reportValidity();
+                    return false;
+                }
+                
+                document.getElementById("frmAssessment").action = "{{ url_for('updateassessmentdate', isloggedin=True) }}";
+                document.getElementById("frmAssessment").enctype = "multipart/form-data";
+                document.getElementById("frmAssessment").submit();
+            }
+            break;
+            default:
+            break;
+        }
+    }
+    </script>
+{% endblock %}

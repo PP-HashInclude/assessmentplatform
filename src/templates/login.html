@@ -1,0 +1,31 @@
+{% extends "basehome.html" %}
+
+{% block content %}
+  <!--<meta name="google-signin-client_id" content="461300472411-s8qf5tuocps338iv7qnobaqtuavidvc0.apps.googleusercontent.com">
+  <script src="https://apis.google.com/js/platform.js" async defer></script> -->
+  <h3 align="center">Login</h3>
+  <div class="imgcontainer">
+    <img src="{{ url_for('static', filename='image/img_avatar2.png') }}" alt="Avatar" class="avatar">
+  </div>
+  <form class="modal-content" action="{{ url_for('chklogin') }}" method="post">
+    <label for="admno"><b>Admission Number</b></label>
+    <input type="text" placeholder="Enter Admission number" name="admno" required>
+
+    <label for="psw"><b>Password</b></label>
+    <input type="password" placeholder="Enter Password" name="psw" required>
+    <label>
+    <p>
+      <input type="checkbox" checked="checked" name="remember" id="chkRemember"> Remember me
+    </p>
+    </label>
+    <p>
+      <label style="color: red;">
+        {{ loginmessage }}
+      </label>
+    </p>
+    <button type="submit">Login</button>
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+    <br>
+    <a href="{{ url_for('forgotpass') }}">Forgot Password</a>
+  </form>
+  {% endblock %}

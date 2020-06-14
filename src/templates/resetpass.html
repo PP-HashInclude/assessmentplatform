@@ -1,0 +1,31 @@
+{% if isteacher %}
+  {% extends "baseteacher.html" %}
+{% else %}
+  {% extends "basestudent.html" %}
+{% endif %}
+
+{% block content %}
+  <h2 align="center">Reset Password</h2>
+  <div class="imgcontainer">
+    <img src="{{ url_for('static', filename='image/img_avatar2.png') }}" alt="Avatar" class="avatar">
+  </div>
+  <form class="modal-content" action="{{ url_for('resetpassword') }}" method="post">
+    <label for="mobno"><b>Admission/Joining Number</b></label>
+    <input type="text" value="{{ playerid }}" name="admno" id="admno" required maxlength="10" pattern="\d{10}"  readonly>
+  
+    <label for="opsw"><b>Old Password</b></label>
+    <input type="password" placeholder="Enter old Password" name="opsw" required maxlength="20">
+
+    <label for="npsw1"><b>New Password</b></label>
+    <input type="password" placeholder="Enter New Password" name="npsw1" required maxlength="20">
+
+    <label for="npsw2"><b>Confirm New Password</b></label>
+    <input type="password" placeholder="Enter New Password" name="npsw2" required maxlength="20">
+    <p>
+      <label style="color: red;">
+        {{ resetpassmessage }}
+      </label>
+    </p>
+    <button type="submit">Reset</button>
+  </form>
+{% endblock %}

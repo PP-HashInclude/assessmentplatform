@@ -1,0 +1,43 @@
+{% extends "basehome.html" %}
+
+{% block content %}
+  <h2 align="center">Welcome to KSVSS Online Assessment System</h2>
+  <form class="modal-content" method="post" id="frmHome">
+    <button type="button" name="btnLogin" id="btnLogin" value="Login" onclick="setDefaultDataAndSubmit('login')" class="btn btn-primary">Login</button> 
+    <br>
+    <p>
+        <label style="color: blue;">Instructions: Follow these simple steps to take your Assessments</label>
+        <br>
+        <ol type="1">
+          <li>Register for online Assessment by using <strong>Register</strong> option on top right corner of this page.</li>
+          <li>Ensure to use your own <strong>Admission or Joining number</strong>, email and mobile number. This is required for validating registration and to receive Assessment reports</li>
+          <li>You need to Login before playing accessing Assessment. Use <strong>Login</strong> option in this page to login.
+          <li>You can check your detailed score in <strong>Subject -> My Score</strong> screen</li>
+          <li>Use <strong>My Assessments</strong> screen to take the Assessment</li>
+          <li>Please note Assessment Start time and End Time</li>
+          <li>On Submit all responses together, the Assessment will be closed.</li>
+          <li>Use <strong>My Account -> Change Profile</strong> to change default subject.  You will get questions based on the default subject set here. You can also change your name and email address here.  You cannot change or delete your mobilenumber.</li>
+          <li>You can change password using <strong>My Account --> Reset Password.</strong> If you forget your password, use forget password link in Login page to reset password based on One-Time-Password you will receive in your registered mobilenumber.</li>
+          <li>About Information can be seen in <strong>About</strong> screen.</li>
+          <li style="color:red"><strong>NOTE: The system is being monitored.  Any attempt to forge or indulge in malpractice will have consequences.</strong></li>
+          <li style="color:blue"><strong>HONESTY IS THE BEST POLICY. ALL THE BEST !</strong></li>
+        </ol>
+      </p>
+      <br>
+      <label style="color: red;">
+          {{ success }}
+      </label>
+  </form>
+  <script>
+    function setDefaultDataAndSubmit(action) {
+      if (action === 'signup') {
+        document.getElementById("frmHome").action = "{{ url_for('signup') }}";
+      }
+      else if (action === 'login') {
+        document.getElementById("frmHome").action = "{{ url_for('login') }}";
+      }
+      document.getElementById("frmHome").submit();
+    }
+</script>
+
+{% endblock %}

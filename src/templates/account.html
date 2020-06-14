@@ -1,0 +1,28 @@
+{% if isteacher %}
+  {% extends "baseteacher.html" %}
+{% else %}
+  {% extends "basestudent.html" %}
+{% endif %}
+
+{% block content %}
+<div class="imgcontainer">
+  <img src="{{ url_for('static', filename='image/img_avatar2.png') }}" alt="Avatar" class="avatar">
+</div>
+<form class="modal-content" action="{{ url_for('updateaccount') }}" method="post">
+  <label for="admno"><b>Admission/Joining Number</b></label>
+  <input type="text" value="{{ dbrows.playerid }}" name="admno" id="admno" required maxlength="4" pattern="\d{4}"  readonly>
+
+  <label for="uname"><b>Name</b></label>
+  <input type="text" value="{{ dbrows.playername }}" name="uname" required maxlength="20">
+
+  <label for="email"><b>E-Mail</b></label>
+  <input type="email" value="{{ dbrows.email }}" name="email" required>
+  <br>
+  <button type="submit">Update</button>
+  <br>
+  <label style="color: red;">
+      {{ accountmessage }}
+  </label>
+</form>
+
+{% endblock %}
