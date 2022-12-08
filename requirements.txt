@@ -1,4 +1,4 @@
-certifi==2020.4.5.1
+certifi==2022.12.7
 cryptography==2.9.2
 DateTime==4.3
 db-sqlite3==0.0.1
